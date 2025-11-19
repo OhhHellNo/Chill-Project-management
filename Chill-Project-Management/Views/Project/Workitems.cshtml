@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Items - Project Management</title>
+    
+    <!-- Bootstrap CSS -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/project-index.css">
+    <style>
+        /* ----------------------------------
+           Global Layout
+        ---------------------------------- */
+        .dashboard-content {
+            padding: 30px;
+            background: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        /* ----------------------------------
+           Page Header
+        ---------------------------------- */
+        .page-header .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            margin: 0;
+            color: #6c757d;
+        }
+
+        /* ----------------------------------
+           Filters Section
+        ---------------------------------- */
+        .filters-section {
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+        }
+
+            /* Filters inputs */
+            .filters-section .form-control,
+            .filters-section .form-select {
+                border-radius: 10px;
+                padding: 10px;
+                font-size: 15px;
+            }
+
+        /* View Toggle Buttons */
+        .btn-outline-secondary {
+            border-radius: 10px;
+        }
+
+            .btn-outline-secondary.active {
+                background: #0d6efd;
+                color: #fff;
+            }
+
+        /* ----------------------------------
+           Work Items List View
+        ---------------------------------- */
+        .workitems-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Each Task Item */
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            background: #ffffff;
+            padding: 18px 20px;
+            border-radius: 12px;
+            gap: 15px;
+            transition: 0.25s;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+            border-left: 5px solid transparent;
+        }
+
+            .task-item:hover {
+                transform: scale(1.01);
+                box-shadow: 0px 3px 9px rgba(0,0,0,0.08);
+            }
+
+            /* Completed Style */
+            .task-item.completed {
+                opacity: 0.7;
+                border-left-color: #28a745 !important;
+            }
+
+        /* Checkbox */
+        .task-checkbox input {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        /* Task Details */
+        .task-details .task-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .task-description {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        /* Small Badges */
+        .task-meta .badge {
+            margin-right: 6px;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        /* Assignee + Date */
+        .task-assignee, .task-date {
+            font-size: 13px;
+            color: #555;
+            margin-right: 10px;
+        }
+
+            .task-assignee i,
+            .task-date i {
+                margin-right: 4px;
+            }
+
+        /* Task actions */
+        .task-actions .btn {
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        /* ----------------------------------
+           Kanban Board
+        ---------------------------------- */
+        .kanban-board {
+            display: flex;
+            gap: 20px;
+        }
+
+        .kanban-column {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 18px;
+            width: 32%;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .column-header {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .column-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .task-count {
+            background: #eee;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        /* Kanban Card */
+        .kanban-card {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.06);
+            cursor: grab;
+            transition: 0.2s;
+        }
+
+            .kanban-card:hover {
+                transform: translateY(-3px);
+            }
+
+        .kanban-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .kanban-card-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-kanban text-primary"></i> ProjectHub
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Add Member Button -->
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                    <i class="bi bi-person-plus me-2"></i>Add Member
+                </button>
+                
+                <!-- Create New Project Button -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                    <i class="bi bi-plus-lg me-2"></i>New Project
+                </button>
+                
+                <!-- User Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-link text-decoration-none dropdown-toggle p-0" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-3 text-primary"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" asp-controller="Home" asp-action="Logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h5 class="project-name">My Awesome Project</h5>
+                <small class="text-muted">Software Development</small>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a asp-controller="Project" asp-action="Index" class="nav-item">
+                    <i class="bi bi-grid"></i>
+                    <span>Overview</span>
+                </a>
+                <a asp-controller="Project" asp-action="WorkItems" class="nav-item active">
+                    <i class="bi bi-list-task"></i>
+                    <span>Work Items</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>Timeline</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-people"></i>
+                    <span>Team</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-folder"></i>
+                    <span>Files</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-chat-dots"></i>
+                    <span>Discussions</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">
+                    <i class="bi bi-gear"></i>
+                    <span>Project Settings</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Work Items Content -->
+        <main class="dashboard-content">
+            <!-- Page Header -->
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="page-title">Work Items</h2>
+                    <p class="text-muted">Manage and track all your project tasks</p>
+                </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                    <i class="bi bi-plus-lg me-2"></i>New Task
+                </button>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="filters-section mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Search tasks...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select">
+                            <option selected>All Status</option>
+                            <option>To Do</option>
+                            <option>In Progress</option>
+                            <option>Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select">
+                            <option selected>All Priority</option>
+                            <option>High</option>
+                            <option>Medium</option>
+                            <option>Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select">
+                            <option selected>All Members</option>
+                            <option>John Doe</option>
+                            <option>Alice Smith</option>
+                            <option>Bob Johnson</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary active" id="listViewBtn">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="boardViewBtn">
+                                <i class="bi bi-kanban"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Items List View -->
+            <div class="workitems-container" id="listView">
+                <!-- Task Item 1 -->
+                <div class="task-item" data-task-id="1" data-status="inprogress">
+                    <div class="task-checkbox">
+                        <input type="checkbox" class="form-check-input">
+                    </div>
+                    <div class="task-details">
+                        <h5 class="task-title">Implement user authentication</h5>
+                        <p class="task-description">Add login and registration functionality with JWT tokens</p>
+                        <div class="task-meta">
+                            <span class="badge bg-danger">High Priority</span>
+                            <span class="badge bg-warning text-dark">In Progress</span>
+                            <span class="task-assignee">
+                                <i class="bi bi-person"></i> John Doe
+                            </span>
+                            <span class="task-date">
+                                <i class="bi bi-calendar"></i> Due: Dec 20, 2024
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#editTaskModal">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task Item 2 -->
+                <div class="task-item" data-task-id="2" data-status="todo">
+                    <div class="task-checkbox">
+                        <input type="checkbox" class="form-check-input">
+                    </div>
+                    <div class="task-details">
+                        <h5 class="task-title">Design landing page mockup</h5>
+                        <p class="task-description">Create high-fidelity designs for the new landing page</p>
+                        <div class="task-meta">
+                            <span class="badge bg-warning text-dark">Medium Priority</span>
+                            <span class="badge bg-primary">To Do</span>
+                            <span class="task-assignee">
+                                <i class="bi bi-person"></i> Bob Johnson
+                            </span>
+                            <span class="task-date">
+                                <i class="bi bi-calendar"></i> Due: Dec 22, 2024
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task Item 3 -->
+                <div class="task-item completed" data-task-id="3" data-status="completed">
+                    <div class="task-checkbox">
+                        <input type="checkbox" class="form-check-input" checked>
+                    </div>
+                    <div class="task-details">
+                        <h5 class="task-title">Setup project repository</h5>
+                        <p class="task-description">Initialize Git repository and configure CI/CD pipeline</p>
+                        <div class="task-meta">
+                            <span class="badge bg-secondary">Low Priority</span>
+                            <span class="badge bg-success">Completed</span>
+                            <span class="task-assignee">
+                                <i class="bi bi-person"></i> Alice Smith
+                            </span>
+                            <span class="task-date">
+                                <i class="bi bi-calendar"></i> Completed: Dec 15, 2024
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task Item 4 -->
+                <div class="task-item" data-task-id="4" data-status="todo">
+                    <div class="task-checkbox">
+                        <input type="checkbox" class="form-check-input">
+                    </div>
+                    <div class="task-details">
+                        <h5 class="task-title">Write API documentation</h5>
+                        <p class="task-description">Document all REST API endpoints with examples</p>
+                        <div class="task-meta">
+                            <span class="badge bg-warning text-dark">Medium Priority</span>
+                            <span class="badge bg-primary">To Do</span>
+                            <span class="task-assignee">
+                                <i class="bi bi-person"></i> Carol Davis
+                            </span>
+                            <span class="task-date">
+                                <i class="bi bi-calendar"></i> Due: Dec 25, 2024
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task Item 5 -->
+                <div class="task-item" data-task-id="5" data-status="inprogress">
+                    <div class="task-checkbox">
+                        <input type="checkbox" class="form-check-input">
+                    </div>
+                    <div class="task-details">
+                        <h5 class="task-title">Conduct user testing</h5>
+                        <p class="task-description">Run usability tests with 10 participants and gather feedback</p>
+                        <div class="task-meta">
+                            <span class="badge bg-danger">High Priority</span>
+                            <span class="badge bg-warning text-dark">In Progress</span>
+                            <span class="task-assignee">
+                                <i class="bi bi-person"></i> Carol Davis
+                            </span>
+                            <span class="task-date">
+                                <i class="bi bi-calendar"></i> Due: Dec 18, 2024
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanban Board View (Hidden by default) -->
+            <div class="kanban-board" id="boardView" style="display: none;">
+                <!-- To Do Column -->
+                <div class="kanban-column" data-status="todo">
+                    <div class="column-header">
+                        <h5 class="column-title">
+                            <i class="bi bi-circle"></i> To Do
+                            <span class="task-count">2</span>
+                        </h5>
+                    </div>
+                    <div class="column-content" id="todoColumn">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- In Progress Column -->
+                <div class="kanban-column" data-status="inprogress">
+                    <div class="column-header">
+                        <h5 class="column-title">
+                            <i class="bi bi-arrow-clockwise"></i> In Progress
+                            <span class="task-count">2</span>
+                        </h5>
+                    </div>
+                    <div class="column-content" id="inprogressColumn">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Completed Column -->
+                <div class="kanban-column" data-status="completed">
+                    <div class="column-header">
+                        <h5 class="column-title">
+                            <i class="bi bi-check-circle"></i> Completed
+                            <span class="task-count">1</span>
+                        </h5>
+                    </div>
+                    <div class="column-content" id="completedColumn">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div class="modal fade" id="createTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Create New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Project" asp-action="CreateTask" method="post">
+                        <div class="mb-3">
+                            <label for="taskTitle" class="form-label">Task Title</label>
+                            <input type="text" class="form-control" id="taskTitle" name="taskTitle" placeholder="Enter task title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="taskDescription" name="taskDescription" rows="3" placeholder="Describe the task..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="taskPriority" class="form-label">Priority</label>
+                                <select class="form-select" id="taskPriority" name="taskPriority" required>
+                                    <option value="">Select priority...</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="taskStatus" class="form-label">Status</label>
+                                <select class="form-select" id="taskStatus" name="taskStatus" required>
+                                    <option value="">Select status...</option>
+                                    <option value="todo">To Do</option>
+                                    <option value="inprogress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="taskAssignee" class="form-label">Assign To</label>
+                                <select class="form-select" id="taskAssignee" name="taskAssignee">
+                                    <option value="">Select member...</option>
+                                    <option value="1">John Doe</option>
+                                    <option value="2">Alice Smith</option>
+                                    <option value="3">Bob Johnson</option>
+                                    <option value="4">Carol Davis</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="taskDueDate" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="taskDueDate" name="taskDueDate">
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Create Task
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal fade" id="addMemberModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add Team Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Project" asp-action="AddMember" method="post">
+                        <div class="mb-3">
+                            <label for="memberEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="memberEmail" name="memberEmail" placeholder="Enter member's email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberRole" class="form-label">Role</label>
+                            <select class="form-select" id="memberRole" name="memberRole" required>
+                                <option value="">Select role...</option>
+                                <option value="admin">Admin</option>
+                                <option value="developer">Developer</option>
+                                <option value="designer">Designer</option>
+                                <option value="tester">Tester</option>
+                                <option value="viewer">Viewer</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Send Invitation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div class="modal fade" id="createProjectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Create New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Project" asp-action="Create" method="post">
+                        <div class="mb-3">
+                            <label for="projectName" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter project name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="projectDescription" name="projectDescription" rows="3" placeholder="Describe your project..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectType" class="form-label">Project Type</label>
+                            <select class="form-select" id="projectType" name="projectType" required>
+                                <option value="">Select type...</option>
+                                <option value="software">Software Development</option>
+                                <option value="marketing">Marketing Campaign</option>
+                                <option value="design">Design Project</option>
+                                <option value="research">Research</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Create Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+    
+    <!-- Kanban Board JavaScript -->
+    <script>
+        // View Toggle
+        const listViewBtn = document.getElementById('listViewBtn');
+        const boardViewBtn = document.getElementById('boardViewBtn');
+        const listView = document.getElementById('listView');
+        const boardView = document.getElementById('boardView');
+
+        listViewBtn.addEventListener('click', () => {
+            listView.style.display = 'flex';
+            boardView.style.display = 'none';
+            listViewBtn.classList.add('active');
+            boardViewBtn.classList.remove('active');
+        });
+
+        boardViewBtn.addEventListener('click', () => {
+            listView.style.display = 'none';
+            boardView.style.display = 'flex';
+            boardViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+            populateKanbanBoard();
+        });
+
+        // Populate Kanban Board
+        function populateKanbanBoard() {
+            const tasks = document.querySelectorAll('#listView .task-item');
+            const todoColumn = document.getElementById('todoColumn');
+            const inprogressColumn = document.getElementById('inprogressColumn');
+            const completedColumn = document.getElementById('completedColumn');
+
+            // Clear columns
+            todoColumn.innerHTML = '';
+            inprogressColumn.innerHTML = '';
+            completedColumn.innerHTML = '';
+
+            tasks.forEach(task => {
+                const status = task.getAttribute('data-status');
+                const kanbanCard = createKanbanCard(task);
+
+                if (status === 'todo') {
+                    todoColumn.appendChild(kanbanCard);
+                } else if (status === 'inprogress') {
+                    inprogressColumn.appendChild(kanbanCard);
+                } else if (status === 'completed') {
+                    completedColumn.appendChild(kanbanCard);
+                }
+            });
+
+            // Update task counts
+            updateTaskCounts();
+        }
+
+        // Create Kanban Card from Task Item
+        function createKanbanCard(taskItem) {
+            const card = document.createElement('div');
+            card.className = 'kanban-card';
+            card.draggable = true;
+            card.setAttribute('data-task-id', taskItem.getAttribute('data-task-id'));
+
+            const title = taskItem.querySelector('.task-title').textContent;
+            const description = taskItem.querySelector('.task-description').textContent;
+            const priority = taskItem.querySelector('.badge:first-of-type').textContent;
+            const priorityClass = taskItem.querySelector('.badge:first-of-type').className;
+            const assignee = taskItem.querySelector('.task-assignee') ? 
+                taskItem.querySelector('.task-assignee').textContent.trim() : 'Unassigned';
+            const date = taskItem.querySelector('.task-date') ? 
+                taskItem.querySelector('.task-date').textContent.trim() : '';
+
+            card.innerHTML = `
+                <div class="kanban-card-header">
+                    <span class="badge ${priorityClass}">${priority}</span>
+                </div>
+                <h6 class="kanban-card-title">${title}</h6>
+                <p class="kanban-card-description">${description}</p>
+                <div class="kanban-card-footer">
+                    <small class="text-muted">${assignee}</small>
+                    ${date ? `<small class="text-muted">${date}</small>` : ''}
+                </div>
+            `;
+
+            // Drag events
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+
+            return card;
+        }
+
+        // Drag and Drop Handlers
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.style.opacity = '0.5';
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('drag-over');
+
+            if (draggedElement !== this) {
+                const newStatus = this.closest('.kanban-column').getAttribute('data-status');
+                const taskId = draggedElement.getAttribute('data-task-id');
+
+                // Move card in board view
+                this.appendChild(draggedElement);
+
+                // Update task status in list view
+                const listTask = document.querySelector(`#listView .task-item[data-task-id="${taskId}"]`);
+                if (listTask) {
+                    listTask.setAttribute('data-status', newStatus);
+                    
+                    // Update status badge
+                    const statusBadge = listTask.querySelector('.badge:nth-of-type(2)');
+                    if (statusBadge) {
+                        if (newStatus === 'todo') {
+                            statusBadge.className = 'badge bg-primary';
+                            statusBadge.textContent = 'To Do';
+                        } else if (newStatus === 'inprogress') {
+                            statusBadge.className = 'badge bg-warning text-dark';
+                            statusBadge.textContent = 'In Progress';
+                        } else if (newStatus === 'completed') {
+                            statusBadge.className = 'badge bg-success';
+                            statusBadge.textContent = 'Completed';
+                            listTask.classList.add('completed');
+                        } else {
+                            listTask.classList.remove('completed');
+                        }
+                    }
+                }
+
+                // Update task counts
+                updateTaskCounts();
+
+                // Here you would typically make an AJAX call to update the database
+                console.log(`Task ${taskId} moved to ${newStatus}`);
+            }
+
+            return false;
+        }
+
+        // Update task counts in column headers
+        function updateTaskCounts() {
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                const count = column.querySelector('.column-content').children.length;
+                column.querySelector('.task-count').textContent = count;
+            });
+        }
+
+        // Setup drop zones
+        function setupDropZones() {
+            const columns = document.querySelectorAll('.column-content');
+            columns.forEach(column => {
+                column.addEventListener('dragover', handleDragOver);
+                column.addEventListener('dragenter', handleDragEnter);
+                column.addEventListener('dragleave', handleDragLeave);
+                column.addEventListener('drop', handleDrop);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupDropZones();
+        });
+    </script>
+</body>
+</html>
