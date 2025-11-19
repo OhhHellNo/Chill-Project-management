@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chill-Project-Management", "Chill-Project-Management.csproj", "{6A292484-40CA-B09C-A427-D193900C47B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A292484-40CA-B09C-A427-D193900C47B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A292484-40CA-B09C-A427-D193900C47B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A292484-40CA-B09C-A427-D193900C47B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A292484-40CA-B09C-A427-D193900C47B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {383BD3ED-AE7A-475B-B220-55A3E4FAB050}
+	EndGlobalSection
+EndGlobal

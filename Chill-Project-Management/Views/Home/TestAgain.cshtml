@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Card & List View</title>
+    <!-- Load Tailwind CSS utilities for input styling (used inline) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        /* Base styles */
+        body {
+            background-color: #e5e5e5;
+            padding: 40px;
+            font-family: 'Inter', Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- CARD STYLES --- */
+        .card {
+            width: 400px;
+            background: white;
+            border-radius: 14px;
+            position: relative;
+            padding: 20px;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+            }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 18px;
+        }
+
+        /* Shared Dropdown/Input Styles */
+        select, input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+            select:focus, input[type="date"]:focus {
+                outline: none;
+                border-color: #666;
+                box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+            }
+
+            select:hover, input[type="date"]:hover {
+                border-color: #999;
+            }
+
+        /* Avatar styles (used in both card and list) */
+        .assigned-container {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+            .assigned-container:hover {
+                transform: scale(1.05);
+            }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            border: 2px solid white;
+            margin-left: -8px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .avatar:first-child {
+                margin-left: 0;
+            }
+
+            .avatar:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 10;
+            }
+
+        .date-info-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+            .date-info-wrapper:hover {
+                color: #4f46e5;
+            }
+
+        /* --- Color Classes (STATE) --- */
+        .todo {
+            background-color: #d8e8ff;
+            color: #0055cc;
+        }
+
+        .inprogress {
+            background-color: #ffe8c2;
+            color: #d47300;
+        }
+
+        .completed {
+            background-color: #d4f5d4;
+            color: #0f8a1c;
+        }
+
+        .cancelled {
+            background-color: #ffd6d6;
+            color: #cc1b1b;
+        }
+
+        /* --- Color Classes (PRIORITY) --- */
+        .urgent {
+            background-color: #ffd6d6;
+            color: #cc1b1b;
+        }
+
+        .high {
+            background-color: #ffe0b3;
+            color: #d47300;
+        }
+
+        .medium {
+            background-color: #fff2b3;
+            color: #d4a000;
+        }
+
+        .low {
+            background-color: #d4f5d4;
+            color: #0f8a1c;
+        }
+
+        .none {
+            background-color: #f0f0f0;
+            color: #777;
+        }
+
+        /* --- MODAL STYLES --- */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-box {
+            background: white;
+            width: 420px;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .dataitems {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        #modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .user-option {
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.15s ease;
+        }
+
+            .user-option:hover {
+                background-color: #f3f4f6;
+            }
+
+            .user-option.selected {
+                background-color: #eef2ff;
+            }
+
+        /* --- LIST VIEW STYLES --- */
+        .list-view {
+            width: 800px;
+            max-width: 95vw;
+        }
+
+        #listViewItem {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+            #listViewItem:hover {
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+                border-color: #d1d5db;
+            }
+
+        .list-title {
+            width: 32%;
+            font-weight: 500;
+        }
+
+        .list-status {
+            width: 15%;
+        }
+
+        .list-priority {
+            width: 15%;
+        }
+
+        .list-date {
+            width: 15%;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .list-assignee {
+            width: 20%;
+        }
+
+        .list-options {
+            width: 3%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+            .list-options i {
+                cursor: pointer;
+                color: #6b7280;
+                transition: color 0.15s;
+            }
+
+                .list-options i:hover {
+                    color: #374151;
+                }
+
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>Task Card Demo</h1>
+    <!-- Task Card -->
+    <div class="card mt-4">
+        <span class="options-icon" id="optionsIcon" style="position: absolute; top: 12px; right: 14px; font-size: 20px; cursor: pointer;">
+            <i class="bi bi-three-dots"></i>
+        </span>
+
+        <div id="cardTitle" class="title">Prepare Q3 Sales Report</div>
+        <div id="cardDescription" class="description">Review regional data and synthesize findings for the executive team meeting next week.</div>
+
+        <div class="flex flex-wrap gap-4 items-center font-medium text-sm text-gray-500">
+            <!-- STATE dropdown -->
+            <select id="stateDropdown" class="todo">
+                <option value="todo">To-do</option>
+                <option value="inprogress">In-progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+
+            <!-- PRIORITY dropdown -->
+            <select id="priorityDropdown" class="high">
+                <option value="urgent">&#x26D4; Urgent</option>
+                <option value="high" selected>&#x25B2; High</option>
+                <option value="medium">&#x25CF; Medium</option>
+                <option value="low">&#x25CF; Low</option>
+                <option value="none">&#x26AA; None</option>
+            </select>
+
+            <input type="date" id="dueDateInput" style="display:none;">
+
+            <!-- Calendar icon + date text -->
+            <div id="dateInfoContainer" class="date-info-wrapper text-gray-700">
+                <i class="bi bi-calendar2-day text-lg"></i>
+                <span id="dueDateText">No due date</span>
+            </div>
+
+            <!-- ASSIGNED SECTION -->
+            <div id="assignedContainer" class="assigned-container">
+                <!-- Avatars rendered by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- New List View Section -->
+    <div class="list-view mt-10">
+        <h3 class="text-xl font-bold mb-4 text-gray-700">List Work Item (list-workitem)</h3>
+        <!-- Interactive List Item Row -->
+        <div id="listViewItem" class="flex justify-between items-center space-x-4">
+            <!-- Content will be injected here by JS, including interactive elements -->
+        </div>
+    </div>
+    <!-- End List View Section -->
+    <!-- MODAL - EDIT FORM -->
+    <div id="optionsModal" class="modal-backdrop">
+        <div class="modal-box">
+            <!-- Modal Header -->
+            <div id="modal-header">
+                <h2 class="text-xl font-bold text-gray-800">Edit Task</h2>
+                <button class="flex items-center space-x-1 text-red-600 hover:text-red-800 transition duration-150">
+                    <span>Delete</span> <i class="bi bi-trash text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Editable Content -->
+            <div class="dataitems p-6 space-y-4">
+                <div class="space-y-2">
+                    <label for="editTitle" class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" id="editTitle" value=""
+                           class="w-full p-3 border border-gray-300 rounded-lg text-lg font-semibold focus:ring-indigo-500 focus:border-indigo-500 transition-shadow">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="editDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="editDescription" rows="4"
+                              class="w-full p-3 border border-gray-300 rounded-lg resize-none text-gray-700 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"></textarea>
+                </div>
+
+                <!-- Status and Priority Dropdowns -->
+                <div class="space-y-2 pt-2 border-t border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700">Status & Priority</label>
+                    <div class="flex space-x-4">
+                        <select id="modalStateDropdown"></select>
+                        <select id="modalPriorityDropdown"></select>
+                    </div>
+                </div>
+
+                <!-- Due Date Input -->
+                <div class="space-y-2 pt-4 border-t border-gray-100">
+                    <label for="modalDueDateInput" class="block text-sm font-medium text-gray-700">Due Date</label>
+                    <input type="date" id="modalDueDateInput"
+                           class="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <!-- Multi-Assignee List -->
+                <div class="space-y-2 pt-4 border-t border-gray-100">
+                    <label class="block text-sm font-medium text-gray-700">Assigned To (Multi-Select)</label>
+                    <div id="modalAssigneeList" class="border border-gray-200 p-2 rounded-lg max-h-48 overflow-y-auto space-y-1">
+                        <!-- User options dynamically inserted here -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div id="modal-footer" class="flex justify-end space-x-3 p-4 border-t border-gray-100">
+                <button id="closeModalBtn" class="bg-gray-200 text-gray-700 hover:bg-gray-300">
+                    Discard
+                </button>
+                <button id="updateModalBtn" class="bg-indigo-600 text-white hover:bg-indigo-700">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Shared Data and Configuration ---
+        const userPool = ["Alice Johnson", "Brian Lee", "Cynthia Adams", "David Parker", "Emily White"];
+        let assignedUsers = ["Brian Lee", "Cynthia Adams"]; // Canonical assignee list
+
+        const stateOptions = [
+            { value: "todo", text: "To-do" },
+            { value: "inprogress", text: "In-progress" },
+            { value: "completed", text: "Completed" },
+            { value: "cancelled", text: "Cancelled" }
+        ];
+        const priorityOptions = [
+            { value: "urgent", text: "Urgent \u26D4" },
+            { value: "high", text: "High \u25B2" },
+            { value: "medium", text: "Medium \u25CF" },
+            { value: "low", text: "Low \u25CF" },
+            { value: "none", text: "None \u26AA" }
+        ];
+
+        const stateColors = {
+            todo: { bg: '#d8e8ff', color: '#0055cc' },
+            inprogress: { bg: '#ffe8c2', color: '#d47300' },
+            completed: { bg: '#d4f5d4', color: '#0f8a1c' },
+            cancelled: { bg: '#ffd6d6', color: '#cc1b1b' }
+        };
+        const priorityColors = {
+            urgent: { bg: '#ffd6d6', color: '#cc1b1b' },
+            high: { bg: '#ffe0b3', color: '#d47300' },
+            medium: { bg: '#fff2b3', color: '#d4a000' },
+            low: { bg: '#d4f5d4', color: '#0f8a1c' },
+            none: { bg: '#f0f0f0', color: '#777' }
+        };
+
+
+        // --- Element References ---
+        const stateDropdown = document.getElementById("stateDropdown");
+        const priorityDropdown = document.getElementById("priorityDropdown");
+        const cardTitle = document.getElementById("cardTitle");
+        const cardDescription = document.getElementById("cardDescription");
+        const dueDateInput = document.getElementById("dueDateInput");
+        const dueDateText = document.getElementById("dueDateText");
+        const assignedContainer = document.getElementById("assignedContainer");
+        const dateInfoContainer = document.getElementById("dateInfoContainer");
+        const optionsModal = document.getElementById("optionsModal");
+        const modalStateDropdown = document.getElementById("modalStateDropdown");
+        const modalPriorityDropdown = document.getElementById("modalPriorityDropdown");
+        const modalDueDateInput = document.getElementById("modalDueDateInput");
+        const modalAssigneeList = document.getElementById("modalAssigneeList");
+        const editTitle = document.getElementById("editTitle");
+        const editDescription = document.getElementById("editDescription");
+        const updateModalBtn = document.getElementById("updateModalBtn");
+        const closeModalBtn = document.getElementById("closeModalBtn");
+        const listViewItem = document.getElementById('listViewItem');
+
+        // --- Utility Functions ---
+
+        // Generates the HTML string for the assignee avatar stack
+        function getAssigneeHtml(userList) {
+            if (userList.length === 0) {
+                return `<span style="font-size:14px; font-weight:500;">Assign <i class="bi bi-person-plus text-lg"></i></span>`;
+            }
+
+            let html = '';
+            userList.slice(0, 3).forEach((name) => {
+                const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const color = `hsl(${hash % 360}, 60%, 50%)`;
+
+                html += `<div class="avatar" title="${name}" style="background-color: ${color};">${name.charAt(0)}</div>`;
+            });
+
+            if (userList.length > 3) {
+                const extraCount = userList.length - 3;
+                const extraTitle = userList.slice(3).join(', ');
+                html += `<div class="avatar" style="background-color: #777;" title="${extraTitle}">+${extraCount}</div>`;
+            }
+
+            return html;
+        }
+
+
+        // Fills a dropdown with options and selects the current value
+        function populateDropdown(dropdown, options, currentValue) {
+            dropdown.innerHTML = options.map(opt =>
+                `<option value="${opt.value}" ${opt.value === currentValue ? 'selected' : ''}>${opt.text}</option>`
+            ).join('');
+        }
+
+        // Applies styling classes and inline styles to a dropdown based on its current value
+        function syncDropdownColor(dropdown, colors) {
+            const value = dropdown.value;
+            Object.keys(colors).forEach(key => dropdown.classList.remove(key));
+            dropdown.classList.add(value);
+            dropdown.style.backgroundColor = colors[value].bg;
+            dropdown.style.color = colors[value].color;
+        }
+
+        // --- Core UI Functions ---
+
+        // Updates the assignee avatar stack in the card view
+        function updateAssigneeAvatars() {
+            assignedContainer.innerHTML = getAssigneeHtml(assignedUsers);
+            renderAllViews();
+        }
+
+        // Updates the text display for the due date and triggers full UI refresh
+        function updateDueDateDisplay() {
+            let formatted = "No due date";
+            if (dueDateInput.value) {
+                const date = new Date(dueDateInput.value + 'T00:00:00');
+                formatted = date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+            }
+            dueDateText.textContent = formatted;
+
+            renderAllViews();
+        }
+
+        // Renders the List View with fully interactive elements
+        function renderListView() {
+            const stateValue = stateDropdown.value;
+            const priorityValue = priorityDropdown.value;
+
+            // Generate content HTML
+            listViewItem.innerHTML = `
+                <div class="list-title truncate" title="${cardTitle.textContent}">
+                    ${cardTitle.textContent}
+                </div>
+
+                <div class="list-status">
+                    <select id="listViewStateDropdown"></select>
+                </div>
+
+                <div class="list-priority">
+                    <select id="listViewPriorityDropdown"></select>
+                </div>
+
+                <div class="list-date flex items-center gap-1 cursor-pointer hover:text-indigo-600 transition" id="listViewDateWrapper">
+                    <i class="bi bi-calendar2-day text-lg"></i>
+                    <span>${dueDateText.textContent}</span>
+                </div>
+
+                <div class="list-assignee assigned-container" id="listViewAssigneeContainer">
+                    <!-- Avatars injected here -->
+                </div>
+
+                <div class="list-options">
+                    <i class="bi bi-three-dots text-xl" id="listViewOptionsIcon" title="Edit Task"></i>
+                </div>
+            `;
+
+            // Get references to the newly created list view interactive elements
+            const listViewStateDropdown = document.getElementById("listViewStateDropdown");
+            const listViewPriorityDropdown = document.getElementById("listViewPriorityDropdown");
+            const listViewDateWrapper = document.getElementById("listViewDateWrapper");
+            const listViewAssigneeContainer = document.getElementById("listViewAssigneeContainer");
+            const listViewOptionsIcon = document.getElementById("listViewOptionsIcon");
+
+            // Inject Assignee Avatars
+            listViewAssigneeContainer.innerHTML = getAssigneeHtml(assignedUsers);
+
+            // Populate and style status/priority
+            populateDropdown(listViewStateDropdown, stateOptions, stateValue);
+            syncDropdownColor(listViewStateDropdown, stateColors);
+
+            populateDropdown(listViewPriorityDropdown, priorityOptions, priorityValue);
+            syncDropdownColor(listViewPriorityDropdown, priorityColors);
+
+            // --- Attach Event Listeners for List Row ---
+
+            // 1. State change listener (Updates the source of truth: card dropdown)
+            listViewStateDropdown.addEventListener('change', (e) => {
+                stateDropdown.value = e.target.value;
+                syncDropdownColor(stateDropdown, stateColors);
+                renderAllViews();
+            });
+
+            // 2. Priority change listener (Updates the source of truth: card dropdown)
+            listViewPriorityDropdown.addEventListener('change', (e) => {
+                priorityDropdown.value = e.target.value;
+                syncDropdownColor(priorityDropdown, priorityColors);
+                renderAllViews();
+            });
+
+            // 3. Date, Assignee, and Options click listeners (Open the modal)
+            listViewDateWrapper.addEventListener('click', openModal);
+            listViewAssigneeContainer.addEventListener('click', openModal);
+            listViewOptionsIcon.addEventListener('click', openModal);
+        }
+
+        // Syncs all three views (Card, List, Modal) with the canonical task state
+        function renderAllViews() {
+            // Card View Sync
+            syncDropdownColor(stateDropdown, stateColors);
+            syncDropdownColor(priorityDropdown, priorityColors);
+
+            // Re-render List View
+            renderListView();
+        }
+
+        // --- Modal Specific Functions ---
+
+        function openModal() {
+            optionsModal.style.display = "flex";
+
+            // 1. Sync Modal Text fields from Card
+            editTitle.value = cardTitle.textContent;
+            editDescription.value = cardDescription.textContent;
+
+            // 2. Populate and Sync Modal Status and Priority
+            const currentState = stateDropdown.value;
+            const currentPriority = priorityDropdown.value;
+
+            populateDropdown(modalStateDropdown, stateOptions, currentState);
+            syncDropdownColor(modalStateDropdown, stateColors);
+
+            populateDropdown(modalPriorityDropdown, priorityOptions, currentPriority);
+            syncDropdownColor(modalPriorityDropdown, priorityColors);
+
+            modalStateDropdown.onchange = () => syncDropdownColor(modalStateDropdown, stateColors);
+            modalPriorityDropdown.onchange = () => syncDropdownColor(modalPriorityDropdown, priorityColors);
+
+
+            // 3. Sync Due Date
+            modalDueDateInput.value = dueDateInput.value;
+
+            // 4. Render and sync Assignee list
+            renderModalAssigneeList();
+        }
+
+        // Renders the multi-select options in the modal
+        function renderModalAssigneeList() {
+            modalAssigneeList.innerHTML = '';
+            let modalAssignedUsers = [...assignedUsers]; // Temporary array for modal edits
+
+            userPool.forEach(user => {
+                const isSelected = modalAssignedUsers.includes(user);
+
+                const optionDiv = document.createElement('div');
+                optionDiv.className = `user-option ${isSelected ? 'selected' : ''}`;
+                optionDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 rounded pointer-events-none">
+                        <span>${user}</span>
+                    </div>
+                    ${isSelected ? '<i class="bi bi-check-lg text-indigo-600"></i>' : ''}
+                `;
+
+                optionDiv.addEventListener('click', () => {
+                    const index = modalAssignedUsers.indexOf(user);
+                    if (index > -1) {
+                        modalAssignedUsers.splice(index, 1);
+                    } else {
+                        modalAssignedUsers.push(user);
+                    }
+
+                    optionDiv.classList.toggle('selected');
+                    const checkbox = optionDiv.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+
+                    let checkIcon = optionDiv.querySelector('.bi-check-lg');
+                    if (checkbox.checked) {
+                        if (!checkIcon) {
+                            optionDiv.insertAdjacentHTML('beforeend', '<i class="bi bi-check-lg text-indigo-600"></i>');
+                        }
+                    } else {
+                        if (checkIcon) {
+                            checkIcon.remove();
+                        }
+                    }
+                });
+
+                modalAssigneeList.appendChild(optionDiv);
+            });
+
+            // Set the update button action
+            updateModalBtn.onclick = () => {
+                // 1. Update text fields on card
+                cardTitle.textContent = editTitle.value;
+                cardDescription.textContent = editDescription.value;
+
+                // 2. Update status and priority on card (source of truth)
+                stateDropdown.value = modalStateDropdown.value;
+                priorityDropdown.value = modalPriorityDropdown.value;
+
+                // 3. Update due date on card (source of truth)
+                dueDateInput.value = modalDueDateInput.value;
+
+                // 4. Update assignee on card (source of truth)
+                assignedUsers = modalAssignedUsers;
+
+                // 5. Trigger full sync and close
+                updateDueDateDisplay(); // Calls renderAllViews internally
+                updateAssigneeAvatars(); // Calls renderAllViews internally
+                optionsModal.style.display = "none";
+            };
+        }
+
+        // --- Event Handlers (Source of Truth) ---
+
+        // Listeners for the Card Dropdowns (Source of truth)
+        stateDropdown.addEventListener('change', (e) => {
+            syncDropdownColor(stateDropdown, stateColors);
+            renderAllViews();
+        });
+        priorityDropdown.addEventListener('change', (e) => {
+            syncDropdownColor(priorityDropdown, priorityColors);
+            renderAllViews();
+        });
+        dueDateInput.addEventListener("change", updateDueDateDisplay); // Calls renderAllViews
+
+        // Click handlers to open modal
+        document.getElementById("optionsIcon").addEventListener("click", openModal);
+        dateInfoContainer.addEventListener("click", openModal);
+        assignedContainer.addEventListener("click", openModal);
+
+        // Close modal
+        closeModalBtn.addEventListener("click", () => {
+            optionsModal.style.display = "none";
+        });
+        optionsModal.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.style.display = "none";
+            }
+        });
+
+        // Initial setup on load
+        window.addEventListener('load', () => {
+            // Initial population of dropdowns
+            populateDropdown(stateDropdown, stateOptions, 'todo');
+            populateDropdown(priorityDropdown, priorityOptions, 'high');
+
+            // Initial rendering of all views
+            updateDueDateDisplay();
+            updateAssigneeAvatars();
+            // Note: updateAssigneeAvatars and updateDueDateDisplay both call renderAllViews internally
+        });
+
+    </script>
+
+</body>
+
+</html>

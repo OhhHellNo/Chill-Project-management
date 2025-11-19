@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create or Join Project - Project Management</title>
+    
+    <!-- Bootstrap CSS (if not already in _Layout.cshtml) -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/createorjoin.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-kanban text-primary"></i> ProjectHub
+            </a>
+            <div class="ms-auto">
+                <div class="dropdown">
+                    <button class="btn btn-link text-decoration-none dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" asp-controller="Home" asp-action="Logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="welcome-section text-center mb-5">
+                <h1 class="welcome-title">Welcome to ProjectHub!</h1>
+                <p class="welcome-subtitle">Let's get started with your project management journey</p>
+            </div>
+
+            <!-- Options Container -->
+            <div class="row g-4 justify-content-center">
+                <!-- Create Project Card -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="option-card create-card">
+                        <div class="card-icon">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <h3 class="card-title">Create a Project</h3>
+                        <p class="card-description">
+                            Start a new project from scratch. Set up your workspace, invite team members, and manage everything in one place.
+                        </p>
+                        <ul class="feature-list">
+                            <li><i class="bi bi-check2"></i> Full project control</li>
+                            <li><i class="bi bi-check2"></i> Invite team members</li>
+                            <li><i class="bi bi-check2"></i> Customizable workflow</li>
+                            <li><i class="bi bi-check2"></i> Real-time collaboration</li>
+                        </ul>
+                        <button type="button" class="btn btn-create" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                            <i class="bi bi-plus-lg me-2"></i>Create New Project
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Join Project Card -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="option-card join-card">
+                        <div class="card-icon">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        </div>
+                        <h3 class="card-title">Join a Project</h3>
+                        <p class="card-description">
+                            Join an existing project using an invitation code. Collaborate with your team and contribute to ongoing projects.
+                        </p>
+                        <ul class="feature-list">
+                            <li><i class="bi bi-check2"></i> Quick access with code</li>
+                            <li><i class="bi bi-check2"></i> Instant collaboration</li>
+                            <li><i class="bi bi-check2"></i> Assigned roles & tasks</li>
+                            <li><i class="bi bi-check2"></i> Team communication</li>
+                        </ul>
+                        <button type="button" class="btn btn-join" data-bs-toggle="modal" data-bs-target="#joinProjectModal">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Join Existing Project
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div class="modal fade" id="createProjectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Create New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Project" asp-action="Create" method="post">
+                        <div class="mb-3">
+                            <label for="projectName" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter project name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="projectDescription" name="projectDescription" rows="3" placeholder="Describe your project..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="projectType" class="form-label">Project Type</label>
+                            <select class="form-select" id="projectType" name="projectType" required>
+                                <option value="">Select type...</option>
+                                <option value="software">Software Development</option>
+                                <option value="marketing">Marketing Campaign</option>
+                                <option value="design">Design Project</option>
+                                <option value="research">Research</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-lg me-2"></i>Create Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Project Modal -->
+    <div class="modal fade" id="joinProjectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-key me-2"></i>Join Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Project" asp-action="Join" method="post">
+                        <div class="mb-3">
+                            <label for="invitationCode" class="form-label">Invitation Code</label>
+                            <input type="text" class="form-control form-control-lg text-center" id="invitationCode" name="invitationCode" placeholder="Enter 6-digit code" maxlength="6" required>
+                            <small class="text-muted">Ask your project admin for the invitation code</small>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-lg me-2"></i>Join Project
+                            </button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Don't have a code? Ask your team lead to invite you.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (if not already in _Layout.cshtml) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+</body>
+</html>

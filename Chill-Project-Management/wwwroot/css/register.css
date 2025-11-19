@@ -1,0 +1,337 @@
+/* Register Page CSS */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --light-bg: #f8f9fa;
+    --dark-bg: #212529;
+    --border-color: #dee2e6;
+    --success-color: #198754;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Register Container */
+.register-container {
+    min-height: 100vh;
+    width: 100%;
+}
+
+.register-container .row {
+    min-height: 100vh;
+}
+
+/* Left Side - Form Section */
+.register-form-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    background-color: #ffffff;
+}
+
+.register-form-wrapper {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Register Title */
+.register-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-bg);
+    margin-bottom: 0.5rem;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 600;
+    color: var(--dark-bg);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.input-group-text {
+    background-color: var(--light-bg);
+    border-right: none;
+}
+
+.form-control {
+    border-left: none;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--primary-color);
+}
+
+.form-control::placeholder {
+    color: #adb5bd;
+    font-size: 0.9rem;
+}
+
+/* Password Hint */
+small.text-muted {
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* Terms & Conditions Checkbox */
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.terms-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.terms-link:hover {
+    text-decoration: underline;
+}
+
+/* Register Button */
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+/* Divider */
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.divider span {
+    position: relative;
+    background-color: white;
+    padding: 0 1rem;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Social Register Buttons */
+.btn-outline-secondary {
+    border-color: var(--border-color);
+    color: var(--dark-bg);
+    font-weight: 500;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--light-bg);
+    border-color: var(--secondary-color);
+    color: var(--dark-bg);
+    transform: translateY(-2px);
+}
+
+/* Login Link */
+.login-text {
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+.login-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+
+/* Back to Home Link */
+.back-home {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.back-home:hover {
+    color: var(--primary-color);
+}
+
+/* Right Side - Brand Section */
+.right-side {
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.9) 0%, rgba(20, 108, 67, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-overlay {
+    text-align: center;
+    color: white;
+    z-index: 2;
+    padding: 2rem;
+}
+
+.brand-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.brand-title i {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.brand-subtitle {
+    font-size: 1.5rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+/* Features List */
+.features-list {
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.feature-item i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: #ffffff;
+}
+
+.feature-item span {
+    color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+    .register-form-container {
+        padding: 2rem 1.5rem;
+        min-height: auto;
+    }
+
+    .register-form-wrapper {
+        max-width: 100%;
+    }
+
+    .register-title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .register-form-container {
+        padding: 2rem 1rem;
+        min-height: auto;
+    }
+
+    .register-title {
+        font-size: 1.5rem;
+    }
+
+    .brand-title {
+        font-size: 2rem;
+    }
+
+    .brand-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .feature-item {
+        font-size: 1rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.register-form-wrapper {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Smooth Scrolling for Mobile */
+.register-form-container {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Input Validation States */
+.form-control:valid {
+    border-color: var(--border-color);
+}
+
+.form-control:invalid:not(:placeholder-shown) {
+    border-color: #dc3545;
+}
+
+.form-control:valid:not(:placeholder-shown) {
+    border-color: var(--success-color);
+}
